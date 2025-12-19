@@ -7,11 +7,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const categoryFilter = document.getElementById("categoryFilter");
     const conflictNotice = document.getElementById("conflictNotice");
 
-    // Local data
     let quotes = JSON.parse(localStorage.getItem("quotes") || "[]");
     let selectedCategory = localStorage.getItem("selectedCategory") || "all";
 
-    // Display random quote
     function showRandomQuote() {
         const filteredQuotes = selectedCategory === "all"
             ? quotes
@@ -22,7 +20,6 @@ document.addEventListener("DOMContentLoaded", () => {
             : "No quotes available for this category.";
     }
 
-    // Add new quote locally
     function addQuote() {
         const text = newQuoteText.value.trim();
         const category = newQuoteCategory.value.trim();
@@ -34,19 +31,19 @@ document.addEventListener("DOMContentLoaded", () => {
         const newQuote = { text, category };
         quotes.push(newQuote);
         saveLocalQuotes();
-
         populateCategories();
         newQuoteText.value = "";
         newQuoteCategory.value = "";
         showRandomQuote();
+
+        // Sync the new quote to server via POST
+        postQuoteToServer(newQuote);
     }
 
-    // Save quotes to localStorage
     function saveLocalQuotes() {
         localStorage.setItem("quotes", JSON.stringify(quotes));
     }
 
-    // Populate categories
     function populateCategories() {
         const categories = ["all", ...new Set(quotes.map(q => q.category))];
         categoryFilter.innerHTML = "";
@@ -60,23 +57,20 @@ document.addEventListener("DOMContentLoaded", () => {
         selectedCategory = categoryFilter.value;
     }
 
-    // Filter quotes by category
     window.filterQuotes = function() {
         selectedCategory = categoryFilter.value;
         localStorage.setItem("selectedCategory", selectedCategory);
         showRandomQuote();
     }
 
-    // Fetch quotes from the server and sync with local data
     async function fetchQuotesFromServer() {
         try {
-            const response = await fetch("https://jsonplaceholder.typicode.com/posts?_limit=5"); // Mock API
+            const response = await fetch("https://jsonplaceholder.typicode.com/posts?_limit=5");
             const serverData = await response.json();
 
-            // Map server data to quote format
             const serverQuotes = serverData.map(item => ({
                 text: item.title,
-                category: item.userId.toString() // Just for demo purposes
+                category: item.userId.toString()
             }));
 
             handleServerSync(serverQuotes);
@@ -85,12 +79,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Sync local and server data with conflict resolution
     function handleServerSync(serverQuotes) {
         let updated = false;
-
         serverQuotes.forEach(serverQuote => {
-            // Check if quote exists locally
             const exists = quotes.some(localQuote => localQuote.text === serverQuote.text);
             if (!exists) {
                 quotes.push(serverQuote);
@@ -110,15 +101,32 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Periodically sync every 30 seconds
+    async function postQuoteToServer(quote) {
+        try {
+            const response = await fetch("https://jsonplaceholder.typicode.com/posts", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                },
+                body: JSON.stringify(quote)
+            });
+
+            const result = await response.json();
+            console.log("Quote successfully posted to server:", result);
+        } catch (err) {
+            console.error("Error posting quote to server:", err);
+        }
+    }
+
+    // Periodic server sync
     setInterval(fetchQuotesFromServer, 30000);
 
-    // Event listeners
     newQuoteBtn.addEventListener("click", showRandomQuote);
     addQuoteBtn.addEventListener("click", addQuote);
 
-    // Initialize
     populateCategories();
     showRandomQuote();
-    fetchQuotesFromServer(); // initial fetch
+    fetchQuotesFromServer();
 });
+
