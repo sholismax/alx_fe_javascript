@@ -96,8 +96,10 @@ document.addEventListener("DOMContentLoaded", () => {
             populateCategories();
             showRandomQuote();
             if (conflictNotice) {
-                conflictNotice.textContent = "Quotes have been synced with server!";
+                conflictNotice.textContent = "Quotes synced with server!";
                 setTimeout(() => conflictNotice.textContent = "", 5000);
+            } else {
+                alert("Quotes synced with server!");
             }
         }
     }
