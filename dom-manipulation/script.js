@@ -6,17 +6,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const newQuoteCategory = document.getElementById("newQuoteCategory");
     const categoryFilter = document.getElementById("categoryFilter");
 
-    // Load quotes from localStorage or start with empty array
+    // Load quotes from localStorage or initialize empty array
     let quotes = JSON.parse(localStorage.getItem("quotes") || "[]");
 
-    // Load last selected filter
-    let currentFilter = localStorage.getItem("lastFilter") || "all";
+    // Track the selected category
+    let selectedCategory = localStorage.getItem("selectedCategory") || "all";
 
-    // Display a random quote based on current filter
+    // Display a random quote based on selected category
     function showRandomQuote() {
-        const filteredQuotes = currentFilter === "all"
+        const filteredQuotes = selectedCategory === "all"
             ? quotes
-            : quotes.filter(q => q.category === currentFilter);
+            : quotes.filter(q => q.category === selectedCategory);
 
         quoteDisplay.textContent = filteredQuotes.length
             ? filteredQuotes[Math.floor(Math.random() * filteredQuotes.length)].text
@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
         quotes.push(newQuote);
         localStorage.setItem("quotes", JSON.stringify(quotes));
 
-        // Update category dropdown if new category
+        // Update category dropdown if new category exists
         populateCategories();
 
         // Clear input fields
@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
         showRandomQuote();
     }
 
-    // Populate categories dynamically
+    // Populate category dropdown dynamically
     function populateCategories() {
         const categories = ["all", ...new Set(quotes.map(q => q.category))];
 
@@ -64,15 +64,15 @@ document.addEventListener("DOMContentLoaded", () => {
             categoryFilter.appendChild(option);
         });
 
-        // Restore last filter
-        categoryFilter.value = categories.includes(currentFilter) ? currentFilter : "all";
-        currentFilter = categoryFilter.value;
+        // Restore previously selected category if available
+        categoryFilter.value = categories.includes(selectedCategory) ? selectedCategory : "all";
+        selectedCategory = categoryFilter.value;
     }
 
-    // Filter quotes when category changes
+    // Filter quotes based on dropdown selection
     window.filterQuotes = function() {
-        currentFilter = categoryFilter.value;
-        localStorage.setItem("lastFilter", currentFilter);
+        selectedCategory = categoryFilter.value;
+        localStorage.setItem("selectedCategory", selectedCategory);
         showRandomQuote();
     }
 
@@ -80,7 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
     newQuoteBtn.addEventListener("click", showRandomQuote);
     addQuoteBtn.addEventListener("click", addQuote);
 
-    // Initialize
+    // Initialize on page load
     populateCategories();
     showRandomQuote();
 });
