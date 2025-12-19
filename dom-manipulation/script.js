@@ -67,8 +67,8 @@ document.addEventListener("DOMContentLoaded", () => {
         showRandomQuote();
     }
 
-    // Simulate server fetch
-    async function fetchServerQuotes() {
+    // Fetch quotes from the server and sync with local data
+    async function fetchQuotesFromServer() {
         try {
             const response = await fetch("https://jsonplaceholder.typicode.com/posts?_limit=5"); // Mock API
             const serverData = await response.json();
@@ -111,7 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Periodically sync every 30 seconds
-    setInterval(fetchServerQuotes, 30000);
+    setInterval(fetchQuotesFromServer, 30000);
 
     // Event listeners
     newQuoteBtn.addEventListener("click", showRandomQuote);
@@ -120,5 +120,5 @@ document.addEventListener("DOMContentLoaded", () => {
     // Initialize
     populateCategories();
     showRandomQuote();
-    fetchServerQuotes(); // initial fetch
+    fetchQuotesFromServer(); // initial fetch
 });
