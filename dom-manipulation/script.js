@@ -36,7 +36,6 @@ document.addEventListener("DOMContentLoaded", () => {
         newQuoteCategory.value = "";
         showRandomQuote();
 
-        // Sync the new quote to server via POST
         postQuoteToServer(newQuote);
     }
 
@@ -73,14 +72,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 category: item.userId.toString()
             }));
 
-            handleServerSync(serverQuotes);
+            return serverQuotes;
         } catch (err) {
             console.error("Error fetching server data:", err);
+            return [];
         }
     }
 
-    function handleServerSync(serverQuotes) {
+    async function syncQuotes() {
+        const serverQuotes = await fetchQuotesFromServer();
         let updated = false;
+
         serverQuotes.forEach(serverQuote => {
             const exists = quotes.some(localQuote => localQuote.text === serverQuote.text);
             if (!exists) {
@@ -93,9 +95,8 @@ document.addEventListener("DOMContentLoaded", () => {
             saveLocalQuotes();
             populateCategories();
             showRandomQuote();
-
             if (conflictNotice) {
-                conflictNotice.textContent = "New quotes from server have been added!";
+                conflictNotice.textContent = "Quotes have been synced with server!";
                 setTimeout(() => conflictNotice.textContent = "", 5000);
             }
         }
@@ -119,14 +120,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Periodic server sync
-    setInterval(fetchQuotesFromServer, 30000);
+    // Automatic periodic sync
+    setInterval(syncQuotes, 30000);
 
     newQuoteBtn.addEventListener("click", showRandomQuote);
     addQuoteBtn.addEventListener("click", addQuote);
 
     populateCategories();
     showRandomQuote();
-    fetchQuotesFromServer();
+    syncQuotes();
 });
-
