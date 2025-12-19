@@ -7,8 +7,7 @@
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; }
         #quoteDisplay { margin: 20px 0; font-size: 20px; font-style: italic; }
-        #categoryFilter, #newQuoteText, #newQuoteCategory, button { margin: 5px 0; padding: 8px; font-size: 16px; }
-        #importExportControls { margin-top: 15px; }
+        select, input, button { margin: 5px 0; padding: 8px; font-size: 16px; }
     </style>
 </head>
 <body>
@@ -25,16 +24,10 @@
     <button id="newQuote">Show New Quote</button>
 
     <!-- Add Quote Form -->
-    <div id="addQuoteForm">
+    <div>
         <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
         <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
         <button id="addQuoteBtn">Add Quote</button>
-    </div>
-
-    <!-- Export / Import Controls -->
-    <div id="importExportControls">
-        <button id="exportQuotesBtn">Export Quotes</button>
-        <input type="file" id="importFile" accept=".json" />
     </div>
 
     <script src="script.js"></script>
