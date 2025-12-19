@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // Select DOM elements
+    // DOM elements
     const quoteDisplay = document.getElementById("quoteDisplay");
     const newQuoteBtn = document.getElementById("newQuote");
     const addQuoteBtn = document.getElementById("addQuoteBtn");
@@ -9,20 +9,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const exportBtn = document.getElementById("exportQuotesBtn");
     const importFile = document.getElementById("importFile");
 
-    // Load quotes from local storage or initialize
+    // Load quotes from local storage
     let quotes = JSON.parse(localStorage.getItem("quotes") || "[]");
 
-    // Load last selected filter from local storage
+    // Load last selected filter
     let currentFilter = localStorage.getItem("lastFilter") || "all";
     categoryFilter.value = currentFilter;
 
-    // Display a random quote based on filter
+    // Display a random quote
     function showRandomQuote() {
         const filteredQuotes = currentFilter === "all"
             ? quotes
             : quotes.filter(q => q.category === currentFilter);
 
-        if (filteredQuotes.length === 0) {
+        if (!filteredQuotes.length) {
             quoteDisplay.textContent = "No quotes available for this category.";
             return;
         }
@@ -54,14 +54,10 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("quotes", JSON.stringify(quotes));
     }
 
-    // Populate category dropdown dynamically
+    // Populate category dropdown
     function populateCategories() {
         const categories = ["all", ...new Set(quotes.map(q => q.category))];
-        categoryFilter.innerHTML = categories.map(cat =>
-            `<option value="${cat}">${cat}</option>`
-        ).join("");
-
-        // Restore previously selected filter
+        categoryFilter.innerHTML = categories.map(cat => `<option value="${cat}">${cat}</option>`).join("");
         if (categories.includes(currentFilter)) {
             categoryFilter.value = currentFilter;
         } else {
@@ -81,10 +77,10 @@ document.addEventListener("DOMContentLoaded", () => {
     exportBtn.addEventListener("click", () => {
         const blob = new Blob([JSON.stringify(quotes, null, 2)], { type: "application/json" });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "quotes.json";
-        a.click();
+        const a = `<a href="${url}" download="quotes.json">Download</a>`;
+        const tmpDiv = document.createElement("div");
+        tmpDiv.innerHTML = a;
+        tmpDiv.querySelector("a").click();
         URL.revokeObjectURL(url);
     });
 
@@ -94,7 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
         fileReader.onload = function(e) {
             try {
                 const importedQuotes = JSON.parse(e.target.result);
-                quotes.push(...importedQuotes);
+                quotes = quotes.concat(importedQuotes);
                 saveQuotes();
                 populateCategories();
                 alert("Quotes imported successfully!");
