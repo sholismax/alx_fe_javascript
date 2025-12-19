@@ -6,12 +6,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const newQuoteCategory = document.getElementById("newQuoteCategory");
     const categoryFilter = document.getElementById("categoryFilter");
 
-    // Load quotes from localStorage or use default
+    // Load quotes from localStorage or start with empty array
     let quotes = JSON.parse(localStorage.getItem("quotes") || "[]");
 
     // Load last selected filter
     let currentFilter = localStorage.getItem("lastFilter") || "all";
-    categoryFilter.value = currentFilter;
 
     // Display a random quote based on current filter
     function showRandomQuote() {
@@ -34,29 +33,43 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        quotes.push({ text, category });
+        // Add quote to array and save to localStorage
+        const newQuote = { text, category };
+        quotes.push(newQuote);
         localStorage.setItem("quotes", JSON.stringify(quotes));
+
+        // Update category dropdown if new category
         populateCategories();
+
+        // Clear input fields
         newQuoteText.value = "";
         newQuoteCategory.value = "";
+
+        // Display a new random quote
         showRandomQuote();
     }
 
     // Populate categories dynamically
     function populateCategories() {
         const categories = ["all", ...new Set(quotes.map(q => q.category))];
-        categoryFilter.innerHTML = categories
-            .map(cat => `<option value="${cat}">${cat}</option>`)
-            .join("");
-        if (categories.includes(currentFilter)) {
-            categoryFilter.value = currentFilter;
-        } else {
-            currentFilter = "all";
-            categoryFilter.value = "all";
-        }
+
+        // Clear existing options
+        categoryFilter.innerHTML = "";
+
+        // Create and append new options
+        categories.forEach(cat => {
+            const option = document.createElement("option");
+            option.value = cat;
+            option.textContent = cat;
+            categoryFilter.appendChild(option);
+        });
+
+        // Restore last filter
+        categoryFilter.value = categories.includes(currentFilter) ? currentFilter : "all";
+        currentFilter = categoryFilter.value;
     }
 
-    // Filter quotes when category is selected
+    // Filter quotes when category changes
     window.filterQuotes = function() {
         currentFilter = categoryFilter.value;
         localStorage.setItem("lastFilter", currentFilter);
